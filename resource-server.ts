@@ -14,14 +14,22 @@ export class ResourceServer {
     authorizationServerPublicKey: GenerateKeyPairResult['publicKey']
   ) {
     try {
-      const { payload } = await jwtVerify(accessToken, authorizationServerPublicKey, { algorithms: [this.algorithm] });
+      const { payload: accessTokenPayload } = await jwtVerify(accessToken, authorizationServerPublicKey, { algorithms: [this.algorithm] });
+
+      if (accessTokenPayload.typ !== 'dpop+jwt') throw new Error();
+      if (accessTokenPayload.iss !== 'https://authorization.server') throw new Error();
+      if (accessTokenPayload.aud !== 'https://resource.server') throw new Error();
+
       const confirmedJWKObject = JSON.parse(
-        Buffer.from((payload.cnf! as { jwk: string }).jwk, 'base64').toString('utf8')
+        Buffer.from((accessTokenPayload.cnf! as { jkt: string }).jkt, 'base64').toString('utf8')
       );
       const confirmedJWK = await importJWK(confirmedJWKObject);
-      await jwtVerify(dPoPToken, confirmedJWK);
+      const { payload: dPoPTokenPayload } = await jwtVerify(dPoPToken, confirmedJWK);
 
-      return this.mapScopesToFields((payload.scopes as string)?.split(/\s+/g));
+      if (dPoPTokenPayload.htu !== 'https://resource.server/my_resource') throw new Error();
+      if (dPoPTokenPayload.htm !== 'POST') throw new Error();
+
+      return this.mapScopesToFields((accessTokenPayload.scopes as string)?.split(/\s+/g));
     } catch {
       return null;
     }
@@ -35,9 +43,9 @@ export class ResourceServer {
 
     if (scopes.includes('read.activities')) {
       fields['activities'] = [{
-        activityId: randomUUID(),
+        activity_id: randomUUID(),
       }, {
-        activityId: randomUUID(),
+        activity_id: randomUUID(),
       }];
     }
 

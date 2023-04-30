@@ -1,7 +1,7 @@
 {
-  "name": "demonstration-of-proof-of-possesion",
-  "version": "1.0.0",
-  "description": "",
+  "name": "dpop-jtw-study",
+  "version": "0.0.0",
+  "description": "Demonstration of Proof-of-Possession at the Application Layer study",
   "main": "index.js",
   "scripts": {
     "start": "ts-node index.ts"

@@ -22,6 +22,7 @@ export class Client {
       iat: Math.floor(Date.now() / 1000),
       exp: Math.floor(Date.now() / 1000) + 60, // 1 minute,
       eua: Buffer.from(
+        /* Base64 over navigator.userAgent (eua = encoded user-agent) */
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246'
       ).toString('base64')
     })
